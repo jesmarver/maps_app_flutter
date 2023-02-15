@@ -41,12 +41,18 @@ class _MapScreenState extends State<MapScreen> {
 
             return BlocBuilder<MapBloc, MapState>(
               builder: (context, mapState) {
+                Map<String, Polyline> polylines = Map.from(mapState.polylines);
+
+                if (!mapState.showMyRoute) {
+                  polylines.removeWhere((key, value) => key == 'myRoute');
+                }
+
                 return SingleChildScrollView(
                   child: Stack(
                     children: [
                       MapView(
                         initialLocation: locationState.lastKnownLocation!,
-                        polylines: mapState.polylines.values.toSet(),
+                        polylines: polylines.values.toSet(),
                       ),
 
                       // TODO: Botones y mas cosas
@@ -61,6 +67,7 @@ class _MapScreenState extends State<MapScreen> {
         floatingActionButton: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: const [
+            BtnToggleUserRoute(),
             BtnFollowUser(),
             BtnCurrentLocation(),
           ],
