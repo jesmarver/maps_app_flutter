@@ -5,16 +5,12 @@ import 'package:maps_app/screens/screens.dart';
 
 void main() {
   runApp(MultiBlocProvider(providers: [
+    BlocProvider(create: (_) => GpsBloc()),
+    BlocProvider(create: (_) => LocationBloc()),
     BlocProvider(
-      create: (_) => GpsBloc(),
-    ),
-    BlocProvider(
-      create: (_) => LocationBloc(),
-    ),
-    BlocProvider(
-      create: (context) =>
-          MapBloc(locationBloc: BlocProvider.of<LocationBloc>(context)),
-    ),
+        create: (context) =>
+            MapBloc(locationBloc: BlocProvider.of<LocationBloc>(context))),
+    BlocProvider(create: (_) => SearchBloc()),
   ], child: const MapsApp()));
 }
 
