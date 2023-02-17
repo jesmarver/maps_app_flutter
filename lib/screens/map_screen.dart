@@ -51,6 +51,7 @@ class _MapScreenState extends State<MapScreen> {
                   child: Stack(
                     children: [
                       MapView(
+                        markers: mapState.markers.values.toSet(),
                         initialLocation: locationState.lastKnownLocation!,
                         polylines: polylines.values.toSet(),
                       ),

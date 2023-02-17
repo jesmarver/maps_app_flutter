@@ -9,6 +9,8 @@ import 'package:maps_app/blocs/blocs.dart';
 import 'package:maps_app/models/models.dart';
 import 'package:maps_app/themes/uber.dart';
 
+import '../../helpers/custom_image_marker.dart';
+
 part 'map_event.dart';
 part 'map_state.dart';
 
@@ -26,7 +28,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     );
     on<UpdateUserPolylinesEvent>(_onPolylineNewPoint);
     on<DisplayPolylinesEvent>(
-      (event, emit) => emit(state.copyWith(polylines: event.polylines)),
+      (event, emit) => emit(
+          state.copyWith(polylines: event.polylines, markers: event.markers)),
     );
     on<OnToggleUserRoute>(
         (event, emit) => emit(state.copyWith(showMyRoute: !state.showMyRoute)));
@@ -85,10 +88,43 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         startCap: Cap.roundCap,
         endCap: Cap.roundCap);
 
+    double kms = destination.distance / 1000;
+    kms = (kms * 100).floorToDouble();
+    kms /= 100;
+
+    double tripDuration = (destination.duration / 60).floorToDouble();
+
+    //Custom Markers
+    final startIconMarker = await getAssetImageMarker();
+    final endIconMarker = await getNetworkImageMarker();
+
+    final startMarker = Marker(
+        markerId: const MarkerId('start'),
+        position: destination.points.first,
+        icon: startIconMarker,
+        infoWindow: InfoWindow(
+            title: 'Inicio', snippet: 'Kms: $kms, duration: $tripDuration'));
+    final endMarker = Marker(
+        markerId: const MarkerId('end'),
+        position: destination.points.last,
+        icon: endIconMarker,
+        anchor: const Offset(0.5, 0.95),
+        infoWindow: InfoWindow(
+            title: '${destination.endPlace.text}',
+            snippet: '${destination.endPlace.placeName}'));
+
     final currentPolylines = Map<String, Polyline>.from(state.polylines);
     currentPolylines['route'] = myRoute;
+    final currentMarkers = Map<String, Marker>.from(state.markers);
+    currentMarkers['start'] = startMarker;
+    currentMarkers['end'] = endMarker;
 
-    add(DisplayPolylinesEvent(polylines: currentPolylines));
+    add(DisplayPolylinesEvent(
+        polylines: currentPolylines, markers: currentMarkers));
+
+    await Future.delayed(const Duration(milliseconds: 300));
+    _mapController?.showMarkerInfoWindow(const MarkerId('start'));
+    // _mapController?.showMarkerInfoWindow(const MarkerId('end'));
   }
 
   @override

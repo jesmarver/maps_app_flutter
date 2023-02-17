@@ -10,3 +10,15 @@ abstract class SearchEvent extends Equatable {
 class OnActivateManualMarkerEvent extends SearchEvent {}
 
 class OnDeactivateManualMarkerEvent extends SearchEvent {}
+
+class OnNewPlacesFoundEvent extends SearchEvent {
+  final List<Feature> places;
+
+  OnNewPlacesFoundEvent({required this.places});
+}
+
+class AddToHistoryEvent extends SearchEvent {
+  final Feature place;
+
+  AddToHistoryEvent({required this.place});
+}
