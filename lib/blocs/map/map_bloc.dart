@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:maps_app/blocs/blocs.dart';
+import 'package:maps_app/helpers/helpers.dart';
 import 'package:maps_app/models/models.dart';
 import 'package:maps_app/themes/uber.dart';
 
@@ -92,26 +93,26 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     kms = (kms * 100).floorToDouble();
     kms /= 100;
 
-    double tripDuration = (destination.duration / 60).floorToDouble();
+    int tripDuration = (destination.duration / 60).floorToDouble().toInt();
 
     //Custom Markers
-    final startIconMarker = await getAssetImageMarker();
-    final endIconMarker = await getNetworkImageMarker();
+    final startIconMarker =
+        await getStartCustomMarker(tripDuration, 'Mi ubicación');
+    final endIconMarker =
+        await getEndCustomMarker(kms.toInt(), destination.endPlace.text);
 
     final startMarker = Marker(
+        anchor: const Offset(0.1, 1),
         markerId: const MarkerId('start'),
         position: destination.points.first,
-        icon: startIconMarker,
-        infoWindow: InfoWindow(
-            title: 'Inicio', snippet: 'Kms: $kms, duration: $tripDuration'));
+        icon: startIconMarker);
+
     final endMarker = Marker(
-        markerId: const MarkerId('end'),
-        position: destination.points.last,
-        icon: endIconMarker,
-        anchor: const Offset(0.5, 0.95),
-        infoWindow: InfoWindow(
-            title: '${destination.endPlace.text}',
-            snippet: '${destination.endPlace.placeName}'));
+      markerId: const MarkerId('end'),
+      position: destination.points.last,
+      icon: endIconMarker,
+      anchor: const Offset(0.5, 0.95),
+    );
 
     final currentPolylines = Map<String, Polyline>.from(state.polylines);
     currentPolylines['route'] = myRoute;
@@ -122,8 +123,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     add(DisplayPolylinesEvent(
         polylines: currentPolylines, markers: currentMarkers));
 
-    await Future.delayed(const Duration(milliseconds: 300));
-    _mapController?.showMarkerInfoWindow(const MarkerId('start'));
+    // await Future.delayed(const Duration(milliseconds: 300));
+    // _mapController?.showMarkerInfoWindow(const MarkerId('start'));
     // _mapController?.showMarkerInfoWindow(const MarkerId('end'));
   }
 
